@@ -1,0 +1,559 @@
+import React, { useState, useEffect } from 'react';
+import { Book, Award, CheckCircle, ChevronRight, ChevronLeft, User, Flag, School, RefreshCw, ArrowRight, FileText, Download, Search } from 'lucide-react';
+
+// --- Assets ---
+
+// Slide Images
+const SlideImages = [
+  "https://img2.pic.in.th/pic/-_Page_0190d83a35c7d58c8e.jpg", // หน้า 1
+  "https://img5.pic.in.th/file/secure-sv1/-_Page_02f57d79791c699c01.jpg", // หน้า 2
+  "https://img2.pic.in.th/pic/-_Page_03e629b97bfd2a67e8.jpg", // หน้า 3
+  "https://img2.pic.in.th/pic/-_Page_04.jpg", // หน้า 4
+  "https://img5.pic.in.th/file/secure-sv1/-_Page_0592238e3d863ac287.jpg", // หน้า 5
+  "https://img5.pic.in.th/file/secure-sv1/-_Page_06.jpg", // หน้า 6
+  "https://img2.pic.in.th/pic/-_Page_07.jpg", // หน้า 7
+  "https://img5.pic.in.th/file/secure-sv1/-_Page_08f124de432e823db4.jpg", // หน้า 8
+  "https://img2.pic.in.th/pic/-_Page_0964d1159aafa95d3d.jpg"  // หน้า 9
+];
+
+// School Logo
+const SCHOOL_LOGO = "https://img5.pic.in.th/file/secure-sv1/unnamed787b948845091a99.md.png";
+
+const QuizData = [
+  {
+    question: "๑. วันรัฐธรรมนูญตรงกับวันที่เท่าไหร่ของทุกปี?",
+    options: ["๕ ธันวาคม", "๑๐ ธันวาคม", "๒๔ มิถุนายน", "๑๒ สิงหาคม"],
+    answer: 1
+  },
+  {
+    question: "๒. รัชกาลใดทรงพระราชทานรัฐธรรมนูญฉบับถาวรฉบับแรก?",
+    options: ["รัชกาลที่ ๕", "รัชกาลที่ ๖", "รัชกาลที่ ๗", "รัชกาลที่ ๙"],
+    answer: 2
+  },
+  {
+    question: "๓. รัฐธรรมนูญฉบับแรกเกิดขึ้นในปี พ.ศ. ใด?",
+    options: ["๒๔๗๕", "๒๕๐๐", "๒๕๔๐", "๒๕๖๐"],
+    answer: 0
+  },
+  {
+    question: "๔. ข้อใดกล่าวถูกต้องที่สุดเกี่ยวกับ 'รัฐธรรมนูญ'?",
+    options: ["กฎหมายสำหรับการค้าขาย", "กฎหมายสูงสุดในการปกครองประเทศ", "กฎระเบียบของโรงเรียน", "คำสั่งของนายกรัฐมนตรี"],
+    answer: 1
+  },
+  {
+    question: "๕. สัญลักษณ์ที่อยู่บนพานแว่นฟ้า ณ อนุสาวรีย์ประชาธิปไตย คืออะไร?",
+    options: ["สมุดไทย (รัฐธรรมนูญ)", "ดาบ", "คันชั่ง", "ดอกบัว"],
+    answer: 0
+  },
+  {
+    question: "๖. อำนาจอธิปไตย เป็นของใคร?",
+    options: ["ปวงชนชาวไทย", "ทหาร", "ตำรวจ", "ข้าราชการ"],
+    answer: 0
+  },
+  {
+    question: "๗. การเปลี่ยนแปลงการปกครอง พ.ศ. ๒๔๗๕ เปลี่ยนจากระบอบใดมาเป็นระบอบประชาธิปไตย?",
+    options: ["สังคมนิยม", "สมบูรณาญาสิทธิราชย์", "คอมมิวนิสต์", "เผด็จการ"],
+    answer: 1
+  },
+  {
+    question: "๘. นักเรียนสามารถแสดงออกถึงการเคารพรัฐธรรมนูญได้อย่างไร?",
+    options: ["ไม่ไปโรงเรียน", "เคารพสิทธิและเสรีภาพของผู้อื่น", "แซงคิวซื้ออาหาร", "ทำลายทรัพย์สินราชการ"],
+    answer: 1
+  },
+  {
+    question: "๙. เมื่ออายุครบ ๑๘ ปีบริบูรณ์ นักเรียนมีหน้าที่ทางการเมืองอย่างไร?",
+    options: ["สมัครเป็นทหารทันที", "ไปใช้สิทธิเลือกตั้ง", "ต้องเป็นกำนัน", "ไม่ต้องทำอะไร"],
+    answer: 1
+  },
+  {
+    question: "๑๐. สีใดในธงชาติไทยที่หมายถึง 'ชาติ'?",
+    options: ["สีขาว", "สีน้ำเงิน", "สีแดง", "สีเหลือง"],
+    answer: 2
+  }
+];
+
+// Mock Data for Passed Students
+const MockPassedUsers = [
+  { id: 1, name: "ด.ช.มานะ พากเพียร", level: "ม.1", date: "10 ธ.ค. 67", score: 10 },
+  { id: 2, name: "ด.ญ.สมหญิง รักดี", level: "ป.6", date: "10 ธ.ค. 67", score: 9 },
+  { id: 3, name: "ด.ช.ปิติ มีทรัพย์", level: "ม.2", date: "10 ธ.ค. 67", score: 8 },
+  { id: 4, name: "ด.ญ.ชูใจ ใฝ่รู้", level: "ม.3", date: "10 ธ.ค. 67", score: 10 },
+  { id: 5, name: "ด.ช.วีระ กล้าหาญ", level: "ม.1", date: "10 ธ.ค. 67", score: 8 },
+];
+
+export default function App() {
+  const [step, setStep] = useState('register'); // register, lesson, quiz, result, passedList
+  const [studentInfo, setStudentInfo] = useState({ name: '', level: 'ม.1' });
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [answers, setAnswers] = useState({});
+  const [score, setScore] = useState(0);
+  const [fadeKey, setFadeKey] = useState(0);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  // Animation trigger
+  useEffect(() => {
+    setFadeKey(prev => prev + 1);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [step, currentSlide]);
+
+  // --- Navigation Logic ---
+
+  const handleStart = (e) => {
+    e.preventDefault();
+    if(studentInfo.name.trim() !== "") setStep('lesson');
+  };
+
+  const nextSlide = () => {
+    if (currentSlide < SlideImages.length - 1) {
+      setCurrentSlide(currentSlide + 1);
+    } else {
+      setStep('quiz');
+    }
+  };
+
+  const prevSlide = () => {
+    if (currentSlide > 0) {
+      setCurrentSlide(currentSlide - 1);
+    } else {
+      setStep('register');
+    }
+  };
+
+  const backToLesson = () => {
+    setStep('lesson');
+    setCurrentSlide(0);
+  };
+
+  const handleAnswer = (qIndex, aIndex) => {
+    setAnswers({ ...answers, [qIndex]: aIndex });
+  };
+
+  const submitQuiz = () => {
+    let newScore = 0;
+    QuizData.forEach((q, index) => {
+      if (answers[index] === q.answer) newScore++;
+    });
+    setScore(newScore);
+    setStep('result');
+  };
+
+  const isPassed = score >= 8;
+
+  // --- Components ---
+
+  const ProgressBar = ({ current, total, label }) => (
+    <div className="w-full mb-4 md:mb-6 px-4">
+      <div className="flex justify-between text-xs text-slate-500 font-medium mb-2 uppercase tracking-wider font-kanit">
+        <span>{label}</span>
+        <span>{Math.round(((current + 1) / total) * 100)}%</span>
+      </div>
+      <div className="h-2 w-full bg-slate-200 rounded-full overflow-hidden">
+        <div 
+          className="h-full bg-blue-600 transition-all duration-500 ease-out"
+          style={{ width: `${((current + 1) / total) * 100}%` }}
+        ></div>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen font-sarabun text-slate-800 bg-slate-100 selection:bg-blue-100 selection:text-blue-900">
+      
+      {/* Google Fonts Import via Style */}
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600&display=swap');
+        
+        .font-kanit { font-family: 'Kanit', sans-serif; }
+        .font-sarabun { font-family: 'Sarabun', sans-serif; }
+        
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(5px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+          animation: fadeIn 0.4s ease-out forwards;
+        }
+        .animate-fade-in-up {
+          animation: fadeIn 0.6s ease-out forwards;
+        }
+      `}</style>
+
+      {/* Background Effect */}
+      <div className="fixed inset-0 z-0 opacity-40 pointer-events-none" 
+           style={{ backgroundImage: `radial-gradient(circle at 10% 20%, rgba(219, 234, 254, 0.6) 0%, rgba(241, 245, 249, 0) 40%)` }}>
+      </div>
+
+      <div className="relative z-10 max-w-4xl mx-auto px-4 py-8">
+        
+        {/* Main Card */}
+        <div className="bg-white shadow-2xl rounded-3xl overflow-hidden border border-slate-200 transition-all duration-500 min-h-[600px] flex flex-col">
+          
+          {/* Header */}
+          <div className="bg-gradient-to-r from-slate-900 to-blue-900 text-white p-6 md:p-8 text-center flex-shrink-0 relative overflow-hidden">
+             <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
+             <div className="absolute bottom-0 left-0 w-64 h-64 bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
+             
+             <div className="relative z-10">
+               <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-2 text-white font-kanit drop-shadow-md">
+                 วันรัฐธรรมนูญ
+               </h1>
+               <p className="text-blue-100 text-sm md:text-base font-sarabun font-light tracking-wide">๑๐ ธันวาคม • วันรำลึกถึงรัฐธรรมนูญฉบับแรกของไทย</p>
+             </div>
+          </div>
+
+          {/* Body Content */}
+          <div key={fadeKey} className="flex-grow flex flex-col animate-fade-in">
+            
+            {/* STEP 1: REGISTER */}
+            {step === 'register' && (
+              <div className="flex flex-col h-full justify-center items-center p-8 md:p-12">
+                <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-xl border border-slate-100 text-center relative">
+                  <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-500 to-indigo-500"></div>
+                  <img 
+                    src={SCHOOL_LOGO}
+                    alt="Logo" 
+                    className="w-28 h-28 mx-auto mb-6 object-contain drop-shadow-md hover:scale-105 transition-transform duration-300"
+                  />
+                  <h2 className="text-2xl font-bold text-slate-800 mb-2 font-kanit">ลงทะเบียนเข้าเรียน</h2>
+                  <p className="text-slate-500 text-sm mb-8 font-sarabun">กรอกข้อมูลเพื่อเริ่มบทเรียนและรับเกียรติบัตร</p>
+                  
+                  <form onSubmit={handleStart} className="space-y-5 text-left">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 font-kanit">ชื่อ-นามสกุล</label>
+                      <input 
+                        type="text" 
+                        required
+                        className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none transition-all font-sarabun"
+                        placeholder="เช่น ด.ช.รักเรียน เพียรศึกษา"
+                        value={studentInfo.name}
+                        onChange={(e) => setStudentInfo({...studentInfo, name: e.target.value})}
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 font-kanit">ระดับชั้น</label>
+                      <div className="relative">
+                        <select 
+                          className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none transition-all appearance-none cursor-pointer font-sarabun"
+                          value={studentInfo.level}
+                          onChange={(e) => setStudentInfo({...studentInfo, level: e.target.value})}
+                        >
+                          <option>ป.6</option>
+                          <option>ม.1</option>
+                          <option>ม.2</option>
+                          <option>ม.3</option>
+                        </select>
+                        <ChevronRight className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none rotate-90 w-4 h-4" />
+                      </div>
+                    </div>
+
+                    <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-all shadow-lg hover:shadow-blue-500/30 flex justify-center items-center gap-2 mt-4 font-kanit text-lg">
+                      <span>เริ่มบทเรียน</span> 
+                      <ArrowRight size={20} />
+                    </button>
+                  </form>
+
+                  <div className="mt-6 pt-6 border-t border-slate-100">
+                    <button 
+                      onClick={() => setStep('passedList')}
+                      className="text-slate-500 hover:text-blue-600 text-sm font-medium flex items-center justify-center gap-2 transition-colors font-kanit w-full py-2 hover:bg-slate-50 rounded-lg"
+                    >
+                      <FileText size={16} /> ตรวจสอบรายชื่อผู้ผ่านการทดสอบ
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* STEP: PASSED LIST (NEW) */}
+            {step === 'passedList' && (
+              <div className="flex flex-col h-full bg-slate-50 p-6 md:p-8">
+                <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col max-h-[600px]">
+                  <div className="p-6 border-b border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4 bg-white sticky top-0 z-10">
+                    <div>
+                      <h2 className="text-xl font-bold text-slate-800 font-kanit flex items-center gap-2">
+                        <Award className="text-yellow-500" /> รายชื่อผู้ผ่านการทดสอบ
+                      </h2>
+                      <p className="text-sm text-slate-500 font-sarabun mt-1">สามารถตรวจสอบรายชื่อและดาวน์โหลดเกียรติบัตรได้</p>
+                    </div>
+                    <div className="relative w-full md:w-auto">
+                      <input 
+                        type="text" 
+                        placeholder="ค้นหาชื่อ..." 
+                        className="pl-9 pr-4 py-2 border border-slate-200 rounded-full text-sm w-full md:w-64 focus:outline-none focus:ring-2 focus:ring-blue-500 font-sarabun"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                      />
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+                    </div>
+                  </div>
+                  
+                  <div className="overflow-y-auto flex-grow">
+                    <table className="w-full text-left border-collapse">
+                      <thead className="bg-slate-50 text-slate-500 font-kanit text-sm uppercase tracking-wider sticky top-0">
+                        <tr>
+                          <th className="p-4 font-medium">ลำดับ</th>
+                          <th className="p-4 font-medium">ชื่อ-นามสกุล</th>
+                          <th className="p-4 font-medium hidden md:table-cell">ระดับชั้น</th>
+                          <th className="p-4 font-medium hidden md:table-cell">คะแนน</th>
+                          <th className="p-4 font-medium text-right">เกียรติบัตร</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100 font-sarabun">
+                        {MockPassedUsers.filter(u => u.name.includes(searchTerm)).map((user, index) => (
+                          <tr key={user.id} className="hover:bg-blue-50 transition-colors">
+                            <td className="p-4 text-slate-400 font-mono text-sm">{index + 1}</td>
+                            <td className="p-4 font-medium text-slate-800">{user.name}</td>
+                            <td className="p-4 text-slate-600 hidden md:table-cell">{user.level}</td>
+                            <td className="p-4 text-slate-600 hidden md:table-cell">
+                              <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-xs font-bold">{user.score}/10</span>
+                            </td>
+                            <td className="p-4 text-right">
+                              <button className="text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 p-2 rounded-lg transition-colors" title="ดาวน์โหลดเกียรติบัตร">
+                                <Download size={18} />
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                    {MockPassedUsers.filter(u => u.name.includes(searchTerm)).length === 0 && (
+                      <div className="p-8 text-center text-slate-400 font-sarabun">
+                        ไม่พบรายชื่อที่ค้นหา
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="p-4 border-t border-slate-100 bg-slate-50">
+                    <button 
+                      onClick={() => setStep('register')}
+                      className="text-slate-600 hover:text-slate-900 font-medium flex items-center gap-2 px-4 py-2 font-kanit"
+                    >
+                      <ChevronLeft size={18} /> กลับหน้าหลัก
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* STEP 2: LESSON (SLIDES) */}
+            {step === 'lesson' && (
+              <div className="flex flex-col h-full bg-slate-100">
+                <div className="bg-white p-4 shadow-sm z-10">
+                  <ProgressBar current={currentSlide} total={SlideImages.length} label={`สไลด์ที่ ${currentSlide + 1} / ${SlideImages.length}`} />
+                </div>
+                
+                <div className="flex-grow flex items-center justify-center p-2 md:p-4 bg-slate-200 overflow-hidden relative">
+                   <div className="relative w-full h-[60vh] md:h-[75vh] flex items-center justify-center rounded-xl overflow-hidden group bg-white shadow-2xl">
+                      <img 
+                        src={SlideImages[currentSlide]} 
+                        alt={`Slide ${currentSlide + 1}`}
+                        className="max-w-full max-h-full object-contain"
+                      />
+                      
+                      {currentSlide > 0 && (
+                        <button 
+                          onClick={prevSlide} 
+                          className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/70 text-white p-3 rounded-full backdrop-blur-sm transition-all z-20"
+                        >
+                          <ChevronLeft size={24} className="md:w-8 md:h-8" />
+                        </button>
+                      )}
+                      
+                      <button 
+                        onClick={nextSlide} 
+                        className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/70 text-white p-3 rounded-full backdrop-blur-sm transition-all z-20"
+                      >
+                          <ChevronRight size={24} className="md:w-8 md:h-8" />
+                      </button>
+                   </div>
+                </div>
+
+                <div className="bg-white p-4 border-t border-slate-200 flex justify-between items-center gap-4">
+                  <button 
+                    onClick={prevSlide}
+                    className={`flex items-center gap-2 px-4 md:px-6 py-3 rounded-lg font-bold transition-colors text-sm md:text-base font-kanit ${currentSlide === 0 ? 'text-slate-300 cursor-not-allowed' : 'text-slate-600 hover:bg-slate-100'}`}
+                  >
+                    <ChevronLeft size={20} /> <span className="hidden md:inline">ย้อนกลับ</span>
+                  </button>
+                  
+                  <span className="text-sm font-medium text-slate-500 font-kanit">
+                     {currentSlide + 1} / {SlideImages.length}
+                  </span>
+
+                  <button 
+                    onClick={nextSlide}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 md:px-8 py-3 rounded-lg font-bold shadow-lg shadow-blue-500/30 flex items-center gap-2 transition-all text-sm md:text-base font-kanit"
+                  >
+                    {currentSlide < SlideImages.length - 1 ? "ถัดไป" : "ทำแบบทดสอบ"} <ChevronRight size={20} />
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* STEP 3: QUIZ */}
+            {step === 'quiz' && (
+              <div className="flex flex-col h-full bg-white">
+                <div className="p-6 md:p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                  <h2 className="text-xl font-bold text-slate-800 flex items-center gap-3 font-kanit">
+                    <span className="flex items-center justify-center w-10 h-10 rounded-full bg-blue-600 text-white text-lg font-bold shadow-md">?</span>
+                    แบบทดสอบวัดความรู้
+                  </h2>
+                  <span className="text-sm font-bold text-blue-600 bg-blue-50 px-4 py-2 rounded-full border border-blue-100 font-kanit">
+                    {Object.keys(answers).length} / {QuizData.length} ข้อ
+                  </span>
+                </div>
+                
+                <div className="flex-grow overflow-y-auto p-6 md:p-8 space-y-8">
+                  {QuizData.map((q, qIdx) => (
+                    <div key={qIdx} className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
+                      <div className="mb-4">
+                         <span className="text-lg font-bold text-slate-800 font-kanit">
+                            {q.question}
+                         </span>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 font-sarabun">
+                        {q.options.map((opt, oIdx) => (
+                          <label key={oIdx} className={`relative flex items-center p-4 rounded-xl cursor-pointer border-2 transition-all ${answers[qIdx] === oIdx ? 'border-blue-500 bg-blue-50' : 'border-slate-100 hover:border-blue-300 hover:bg-slate-50'}`}>
+                            <div className={`w-5 h-5 rounded-full border-2 mr-3 flex-shrink-0 flex items-center justify-center ${answers[qIdx] === oIdx ? 'border-blue-600' : 'border-slate-300'}`}>
+                               {answers[qIdx] === oIdx && <div className="w-2.5 h-2.5 rounded-full bg-blue-600"></div>}
+                            </div>
+                            <input 
+                              type="radio" 
+                              name={`q-${qIdx}`} 
+                              className="hidden"
+                              checked={answers[qIdx] === oIdx}
+                              onChange={() => handleAnswer(qIdx, oIdx)}
+                            />
+                            <span className={`text-sm md:text-base font-medium ${answers[qIdx] === oIdx ? 'text-blue-900' : 'text-slate-600'}`}>{opt}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                
+                <div className="p-6 border-t border-slate-100 bg-slate-50 flex justify-between items-center gap-4">
+                  <button 
+                    onClick={backToLesson}
+                    className="text-slate-500 hover:text-slate-700 font-medium flex items-center gap-2 px-4 py-2 font-kanit"
+                  >
+                    <Book size={18} /> ดูสไลด์ทบทวน
+                  </button>
+                  <button 
+                    onClick={submitQuiz}
+                    disabled={Object.keys(answers).length < QuizData.length}
+                    className={`px-8 py-3 rounded-xl font-bold shadow-lg flex items-center gap-2 transition-all font-kanit
+                      ${Object.keys(answers).length < QuizData.length 
+                        ? 'bg-slate-300 text-slate-500 cursor-not-allowed' 
+                        : 'bg-green-600 hover:bg-green-700 text-white shadow-green-500/30'}`}
+                  >
+                    ส่งคำตอบ <CheckCircle size={20} />
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* STEP 4: RESULT */}
+            {step === 'result' && (
+              <div className="flex flex-col h-full justify-center items-center text-center p-8 bg-slate-50 animate-fade-in-up">
+                {isPassed ? (
+                  <div className="max-w-lg w-full">
+                    <div className="mb-8">
+                       <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce ring-8 ring-green-50">
+                         <Award className="w-12 h-12 text-green-600" />
+                       </div>
+                       <h2 className="text-3xl font-bold text-slate-800 mb-2 font-kanit">สอบผ่านแล้ว! ยินดีด้วย</h2>
+                       <p className="text-slate-500 font-sarabun">คะแนนของคุณ</p>
+                       <div className="mt-2 text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 font-kanit">
+                          {score} / 10
+                       </div>
+                    </div>
+                    
+                    {/* Simulated Certificate */}
+                    <div className="relative w-full mb-8 transform hover:scale-105 transition-transform duration-500">
+                      <div className="bg-white p-1 border-4 border-double border-slate-200 shadow-2xl rounded-sm">
+                        <div className="border border-slate-300 p-8 bg-[url('https://png.pngtree.com/png-clipart/20221115/original/pngtree-thai-pattern-golden-frame-for-certificate-border-png-image_8741629.png')] bg-center bg-cover relative overflow-hidden">
+                          
+                          <div className="w-16 h-16 mx-auto mb-4 opacity-90 bg-red-800 rounded-full flex items-center justify-center text-white text-[10px] font-serif shadow-sm relative z-10">
+                             (ตราครุฑ)
+                          </div>
+                          <h3 className="text-xl font-serif text-slate-900 font-bold mb-4 relative z-10">เกียรติบัตรฉบับนี้ให้ไว้เพื่อแสดงว่า</h3>
+                          <div className="py-2 border-b-2 border-dotted border-slate-400 mb-6 relative z-10">
+                             <p className="text-2xl font-bold text-blue-900 font-sarabun">{studentInfo.name}</p>
+                          </div>
+                          <p className="text-slate-600 text-sm mb-2 relative z-10 font-sarabun">ได้ผ่านการทดสอบวัดความรู้เรื่อง</p>
+                          <h4 className="text-lg font-bold text-slate-800 mb-10 uppercase tracking-wide relative z-10 font-kanit">"วันรัฐธรรมนูญ ๑๐ ธันวาคม"</h4>
+                          
+                          <div className="flex justify-between items-end relative z-10 font-sarabun">
+                            <div className="text-[10px] text-slate-400 text-left leading-tight">
+                               เลขที่: {Math.floor(Math.random()*10000)}<br/>
+                               วันที่: ๑๐ ธันวาคม
+                            </div>
+                            <div className="text-center">
+                              <div className="h-px bg-slate-800 w-24 mb-2"></div>
+                              <p className="text-[10px] font-bold text-slate-600">ผู้อำนวยการโรงเรียน</p>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="absolute bottom-6 left-6 w-16 h-16 bg-gradient-to-br from-yellow-300 via-yellow-500 to-yellow-600 rounded-full opacity-90 flex items-center justify-center shadow-xl border-2 border-white">
+                           <Award className="text-white w-8 h-8" />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-4 justify-center">
+                       <button 
+                         onClick={() => { setStep('register'); setStudentInfo({name: '', level: 'ม.1'}); setAnswers({}); setScore(0); setCurrentSlide(0); }}
+                         className="bg-white border border-slate-200 text-slate-600 px-6 py-3 rounded-full hover:bg-slate-50 transition-all font-bold text-sm shadow-sm font-kanit"
+                       >
+                         กลับหน้าหลัก
+                       </button>
+                       <button 
+                         onClick={() => window.print()} 
+                         className="bg-slate-900 text-white px-8 py-3 rounded-full hover:bg-black transition-all shadow-lg font-bold text-sm flex items-center gap-2 font-kanit"
+                       >
+                         พิมพ์เกียรติบัตร
+                       </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="max-w-md w-full bg-white p-8 rounded-2xl shadow-xl">
+                    <div className="w-20 h-20 bg-rose-50 rounded-full flex items-center justify-center mx-auto mb-6 ring-8 ring-rose-50/50">
+                        <span className="text-4xl">✌️</span>
+                    </div>
+                    <h2 className="text-2xl font-bold text-slate-800 mb-2 font-kanit">เกือบผ่านแล้ว!</h2>
+                    <p className="text-slate-500 mb-8 font-sarabun">คุณได้ {score} คะแนน (ต้องการ 8 คะแนนเพื่อผ่าน)<br/>ลองทบทวนบทเรียนอีกครั้งนะคะ</p>
+                    <button 
+                      onClick={() => {
+                        setStep('lesson');
+                        setCurrentSlide(0);
+                        setAnswers({});
+                        setScore(0);
+                      }}
+                      className="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-4 px-8 rounded-xl transition-all shadow-lg shadow-amber-500/30 flex items-center justify-center gap-2 font-kanit"
+                    >
+                      <RefreshCw size={20} />
+                      ทบทวนบทเรียนและสอบใหม่
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
+          </div>
+          
+          {/* Footer Credit */}
+          <div className="bg-white p-4 text-center border-t border-slate-100 flex-shrink-0 z-10">
+             <p className="text-[10px] md:text-xs text-slate-400 font-medium font-sarabun">
+               ผลิตและพัฒนาโดยครูนทีธร เหล่าโสด โรงเรียนบ้านนาดินดำ<br/>สำนักงานเขตพื้นที่การศึกษาประถมศึกษาเลย เขต 1
+             </p>
+          </div>
+
+        </div>
+      </div>
+      
+    </div>
+  );
+}
