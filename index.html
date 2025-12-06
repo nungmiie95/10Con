@@ -90,7 +90,8 @@
         const { useState, useEffect } = React;
         
         // --- ⚙️ การตั้งค่าระบบ ---
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyZXL4X1MM7p68zA_fFSt0bZ5I5aEjbsWExQOb7QI0fl_jwcQbzrAcPHbgIXZuEOpz8/exec";
+        // อัปเดต URL ใหม่ล่าสุดให้แล้วค่ะ
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyIla4mipXeLG3t8jFBKteHv0vnLBr78N4boZk2DjV9eWo-c4w-UtDIQC-Ml7RxFXE/exec";
 
         // --- Assets ---
         const SlideImages = [
@@ -187,6 +188,7 @@
 
           // --- API Functions ---
           const fetchPassedUsers = async () => {
+            if (!WEB_APP_URL || WEB_APP_URL.includes("วางลิงก์")) return;
             setIsLoading(true);
             try {
               const response = await fetch(`${WEB_APP_URL}?action=getList`);
@@ -202,8 +204,10 @@
           };
 
           const saveResult = async (finalScore) => {
+            if (!WEB_APP_URL || WEB_APP_URL.includes("วางลิงก์")) return;
             setIsSaving(true);
             try {
+              // ใช้ mode: 'no-cors' เพื่อเลี่ยงปัญหา CORS ใน Google Script เบื้องต้น
               await fetch(WEB_APP_URL, {
                 method: 'POST',
                 mode: 'no-cors', 
@@ -239,7 +243,8 @@
             setScore(newScore);
             setStep('result');
             
-            if (newScore >= 8) {
+            // ถ้าสอบผ่านและตั้งค่า URL แล้ว ให้บันทึกข้อมูล
+            if (newScore >= 8 && WEB_APP_URL && !WEB_APP_URL.includes("วางลิงก์")) {
               saveResult(newScore);
             }
           };
@@ -301,8 +306,13 @@
                             className="w-28 h-28 mx-auto mb-6 object-contain drop-shadow-md hover:scale-105 transition-transform duration-300"
                           />
                           <h2 className="text-2xl font-bold text-slate-800 mb-2 font-kanit">ลงทะเบียนเข้าเรียน</h2>
-                          <p className="text-slate-500 text-sm mb-8 font-sarabun">กรอกข้อมูลเพื่อเริ่มบทเรียนและรับเกียรติบัตร</p>
                           
+                          {WEB_APP_URL === "วางลิงก์_Google_Script_ที่นี่" && (
+                            <div className="mb-4 bg-yellow-50 text-yellow-700 text-xs p-2 rounded border border-yellow-200">
+                               *กรุณาใส่ลิงก์ Google Script ในโค้ดบรรทัดที่ 53 เพื่อเปิดใช้งานระบบบันทึกผล
+                            </div>
+                          )}
+
                           <form onSubmit={handleStart} className="space-y-5 text-left">
                             <div>
                               <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 font-kanit">ชื่อ-นามสกุล</label>
@@ -360,7 +370,7 @@
                               <h2 className="text-xl font-bold text-slate-800 font-kanit flex items-center gap-2">
                                 <i data-lucide="award" className="text-yellow-500 w-6 h-6"></i> รายชื่อผู้ผ่านการทดสอบ
                               </h2>
-                              <p className="text-sm text-slate-500 font-sarabun mt-1">สามารถตรวจสอบรายชื่อและดาวน์โหลดเกียรติบัตรได้</p>
+                              <p className="text-sm text-slate-500 font-sarabun mt-1">รายชื่อจะปรากฏเฉพาะผู้ที่สอบผ่าน 8 คะแนนขึ้นไป</p>
                             </div>
                             <div className="relative w-full md:w-auto">
                               <input 
@@ -399,8 +409,7 @@
                                               <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-xs font-bold">{user.score}/10</span>
                                             </td>
                                             <td className="p-4 text-right">
-                                              {/* In a real app, this would trigger a download. For now, we simulate by going to result screen for that user if possible, or just alerting */}
-                                              <button onClick={() => alert('ฟังก์ชันดาวน์โหลดเกียรติบัตรย้อนหลังสำหรับ ' + user.name)} className="text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 p-2 rounded-lg transition-colors" title="ดาวน์โหลดเกียรติบัตร">
+                                              <button onClick={() => alert('ฟังก์ชันดาวน์โหลดเกียรติบัตรย้อนหลังสำหรับ ' + user.name + ' (สามารถพัฒนาต่อยอดได้ในอนาคต)')} className="text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 p-2 rounded-lg transition-colors" title="ดาวน์โหลดเกียรติบัตร">
                                                 <i data-lucide="download" className="w-4 h-4"></i>
                                               </button>
                                             </td>
@@ -426,7 +435,7 @@
                       </div>
                     )}
 
-                    {/* STEP 2: LESSON */}
+                    {/* STEP 2: LESSON (SLIDES) */}
                     {step === 'lesson' && (
                       <div className="flex flex-col h-full bg-slate-100">
                         <div className="bg-white p-4 shadow-sm z-10">
